@@ -1,3 +1,9 @@
+/**
+	Game of Blackjack
+	You can play with one or two players
+	each player creaates a account if they don't have one and if they do they can load their existing data
+	Each player and the dealer are dealt two cards, the dealers first card is face down
+*/
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -5,6 +11,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iomanip>
+#include <time.h>
 using namespace std;
 
 //enum types for the card suits
@@ -17,8 +24,6 @@ int MIN_BET = 5; //Minimum bet is $5
 
 //Structures
 struct account{ //account structure. This will store all the player information
-	string name; //The name on the account
-	string email; //the email address registered to this account
 	string username; //the username of this account
 	string password; //pasword for the account
 
@@ -145,22 +150,19 @@ int main(){
 		cond = true; //they finished one hand
 	}while(players.size() > 1);
 	//!(input == 'q' || input == 'Q')
-
 	return 0;
 }
-
-
 /**
 	Simple method that displays the rules of the game only
 */
 void displayRules(){
-	cout << "The rules of blackjack are fairly simple and your only opponent in the game is the dealer. Each player is dealt a two cards face up while the dealer only has one card face up. The goal is to have your two cards added total to be higher than the dealer’s two cards and under 21. If you go over 21 you “bust”, or lose, or if the dealers two cards added together are higher than yours you also lose.	 If your two card total is equal to the dealers then it is a “stand-off” or a tie. Cards values are usually face value, 2 is 2 and 10 is 10, while all face cards, jack/queen/king, are also 10. The only exception to this rule are Aces, they can take on the value of 1 or 11. To get your two cards total you simply add your two cards together. If you have any combination of an Ace or any card that is 10 points then you have what is called blackjack, 21 pts. Getting blackjack means you get paid more if you win. With all of that being said if you’re not satisfied with your two card total then you can take extra cards, called taking a hit, and for each hit you get you get one more card. The dealer does this as well but has a strict set of rules to follow on whether or not to take a hit. If a dealer’s hand is less than or equal to 16 or a “soft” 17, meaning they have an ace and a 6, they must take a hit. If it’s 17 or higher the dealer must stand.  So now that we know the dealer rules there are a few options for users.  As I stated earlier you can take hits to increase your card total. You may also split your cards and double down. Splitting can be done when your first two cards are of equal value and can only be split from the original hand, split hands cannot be split, the bet has to be equal or greater than the original bet for each hand. For each time you split you will receive and additional card for that hand and then you play like regular blackjack.  Users may also double down which consists of a user placing another bet of equal or lesser value when their first two cards total is equal to 9, 10, or 11 without aces. After doubling down you will only get one additional card. Some of you may have realized that if the dealer gets a blackjack or 21 you pretty much always lose, unless you yourself have blackjack. There is a way around this and it’s called insurance. If the dealer is dealt an ace face up then the dealer will ask if you want to take out insurance, equal to half of your original bet, to insure your hand if the dealer has blackjack and only when he has blackjack and helps insure you don’t lose money if he does have blackjack, insurance pays 2 to 1 so your insurance bet will cover the loss of your hand if you bet half." << endl; //displays the rules
+	cout << "->   The goal is to have your two cards added total to be higher than the dealer’s two cards and under 21. If you go over 21 you “bust”, or lose, or if the dealers two cards added together are higher than yours you also lose." << endl<<"->   There are 4 moves you can do in this game."<<endl<<"-->   Hit(H)- you can take one additional card."<<endl<<"-->   Stay(S)- you can literally stay and don't take any move"<<endl<<"-->   Split(L)- you can split your hand into two when you get same value cards"<<endl<<"-->   Double Down(D)- you acn double your bet after seeing the dealer's first card"<<endl<<"->   Dealer's first card is faced down in the start"<<endl<<"->   You get a stay by default."<<endl; //displays the rules
 }
 /**
 	Simple method that displays the menu for the game only
 */
 void displayMenu(){
-	cout << "Welcome to the game of Blackjack!" << endl; //output
+	cout << "****************************************************************************WELCOME TO THE GAME OF BLACKJACK!!!****************************************************************************" << endl; //output
 	cout << "Please select an option below." << endl; //output
 	cout << "1) Rules" << endl; //output
 	cout << "2) Play" << endl; //output
@@ -179,6 +181,8 @@ void dealer_play(player &dealer){
  Takes in the vector of players by reference so we can make changes directly to the players
 */
 void play(vector<player> &players){
+	time_t start,stop,start1,end;
+	time( &start );
 	char input; //for our input
 
 	for(int i =1;i<players.size();i++){ //cycles through the players
@@ -191,7 +195,7 @@ void play(vector<player> &players){
 	*/
 	for(int i = 0;i< (players.size()*2);i++){ 
 		players[(i%players.size())].hand.push_back(deal());
-		if((i%players.size()) == 0 && (i%2) == 0){ //the dealers first card
+		if((i%players.size()) == 0 && (i/2) == 0){ //the dealers first card
 			players[(i%players.size())].hand[(i%2)].up = false; //is set to false since it's face down
 		}
 	}
@@ -199,7 +203,7 @@ void play(vector<player> &players){
 		The below function shows each players score but the dealers
 	*/
 	for(int i=1;i<players.size();i++){
-		cout << players[i].info.username << " has: " << score(players[i].hand) << setw(10) << endl;
+		cout << players[i].info.username << " hand value is: " << score(players[i].hand) << setw(10) << endl;
 	}
 
 	/**
@@ -255,7 +259,7 @@ void play(vector<player> &players){
 					/**
 					The most complicated first - if they have a pair of 5's they can split, double down, hit, or stay
 					*/
-					if(((players[i].hand[0].value >= 10 && players[i].hand[1].value >= 10) || players[i].hand[0].value == players[i].hand[1].value) && players[i].hand.size() == 2  && score(players[i].hand) == 10){ 
+					/*if(((players[i].hand[0].value >= 10 && players[i].hand[1].value >= 10) || players[i].hand[0].value == players[i].hand[1].value) && players[i].hand.size() == 2  && score(players[i].hand) == 10){ 
 						cout << players[i].info.username << " score: " << score(players[i].hand) << endl; //shows them their score
 						cout << "Would you like to Double Down(D), split(L),take a hit(H), or stay(S), default is to take a stay?" << endl; //ask them
 					}
@@ -270,8 +274,124 @@ void play(vector<player> &players){
 					else{ //they can't do anything special
 						cout << players[i].info.username << " score: " << score(players[i].hand) << endl; //shows them their score
 						cout << "Hit(H) or Stay(S), default is to take a stay?"; //asks them what they want to do
+					}*/
+					if(score(players[i].hand)<=11 && !hasAce(players[i].hand) && (players[i].hand[0].value != players[i].hand[1].value))
+					{
+						cout << players[i].info.username << " score is : " << score(players[i].hand) << endl;
+						cout << "Would you like to Double Down(D) or take a hit(H) default is to take a stay?" << endl;
+						if(score(players[i].hand)<=7) cout<<"You must take a hit(H) according to the strategy";
+						else if(score(players[i].hand) == 8) 
+						{
+							if(players[0].hand[1].value<4 || (players[0].hand[1].value<10 && players[0].hand[1].value>6)) cout<<"You must take a hit(H) according to the strategy ";
+							else cout<<"You must do Double DOWN(D) according to the strategy ";
+						}
+						else if(score(players[i].hand) == 9)
+						{
+							if((players[0].hand[1].value<10&&players[0].hand[1].value>6) || players[0].hand[1].value==1) cout<<"You must take a hit(H) according to the strategy ";
+							else cout<<"You must do Double DOWN(D) according to the strategy ";
+						}
+						else if(score(players[i].hand) == 10)	
+						{
+							if(players[0].hand[1].value == 1 || players[0].hand[1].value==10) cout<<"You must take a hit(H) according to the strategy ";
+							else cout<<"You must do Double DOWN(D) according to the strategy ";
+						}			
+						else cout<<"You must do Double DOWN(D) according to the strategy ";
 					}
+					else if((score(players[i].hand)<=20&&score(players[i].hand)>=12) && !hasAce(players[i].hand) && (players[i].hand[0].value != players[i].hand[1].value))
+					{
+						cout << players[i].info.username << " score is : " << score(players[i].hand) << endl;
+						cout << "Would you like to take a hit(H) or stay(S), default is to take a stay?" << endl;
+						if(score(players[i].hand)==12)
+						{
+							if(players[0].hand[1].value<=6 && players[0].hand[1].value>=4) cout<<"You must take a stay(S) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy ";
+						}
+						else if(score(players[i].hand)<=16 && score(players[i].hand) > 12)
+						{ 
+							if(players[0].hand[1].value<=6 && players[0].hand[1].value>=2) cout<<"You must take a stay(S) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy ";
+						}
+						else  cout<<"You must take a stay(S) according to the strategy ";
+					}
+					else if((score(players[i].hand)<=20&&score(players[i].hand)>=12) && hasAce(players[i].hand) && (players[i].hand[0].value != players[i].hand[1].value))
+					{
+						cout << players[i].info.username << " score is : " << score(players[i].hand) << endl;
+						cout << "Would you like to take a hit(H), Double Down(D) or stay(S), default is to take a stay?" << endl;
+						if(score(players[i].hand)>=13 && score(players[i].hand)<=16)
+						{
+							if(players[0].hand[1].value<=6 && players[0].hand[1].value>=4) cout<<"You must make a Double Down(D) according to the strategy ";
+							else cout<<"You must take a hit(S) according to the strategy ";
+						}	
+						else if(score(players[i].hand) == 17)
+						{
+							if(players[0].hand[1].value<=6 && players[0].hand[1].value>=2) cout<<"You must make a Double Down(D) according to the strategy ";
+							else cout<<"You must take a hit(S) according to the strategy ";
+						}
+						else if(score(players[i].hand) == 18)
+						{
+							if(players[0].hand[1].value>=3&&players[0].hand[1].value<=6) cout<<"You must make a Double Down(D) according to the strategy ";
+							else if(players[0].hand[1].value>=9&&players[0].hand[1].value<=10) cout<<"You must take a hit(H) according to the strategy ";
+							else "You must take a stay(S) according to the strategy ";
+						}
+						else if(score(players[i].hand) == 19)
+						{
+							if(players[0].hand[1].value>=5&&players[0].hand[1].value<=6) cout<<"You must make a Double Down(D) according to the strategy ";
+							else cout<<"You must take a stay(S) according to the strategy ";
+						}
+						else cout<<"You must take a stay(S) according to the strategy ";
+					}
+					else if((score(players[i].hand)<=20&&score(players[i].hand)>=4) && (players[i].hand[0].value == players[i].hand[1].value))
+					{
+						cout << players[i].info.username << " score is : " << score(players[i].hand) << endl;
+						cout << "Would you like to take a hit(H), Double Down(D), split(L) or stay(S), default is to take a stay?" << endl;
+						if(players[i].hand[0].value == 2&&players[i].hand[1].value == 2)
+						{
+							if(players[0].hand[1].value<=7 && players[0].hand[1].value>=2) cout<<"You must split(L) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy  ";
+						}
+						else if(players[i].hand[0].value == 3&&players[i].hand[1].value == 3)
+						{
+							if(players[0].hand[1].value<=7 && players[0].hand[1].value>=4) cout<<"You must split(L) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy  ";
+						}
+						else if(players[i].hand[0].value == 4&&players[i].hand[1].value == 4)
+						{
+							if(players[0].hand[1].value<=6 && players[0].hand[1].value>=5) cout<<"You must make a Double Down(D) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy  ";
+						}
+						else if(players[i].hand[0].value == 5&&players[i].hand[1].value == 5)
+						{		
+							if(players[0].hand[1].value<=9 && players[0].hand[1].value>=2) cout<<"You must make a Double Down(D) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy  ";
+						}
+						else if(players[i].hand[0].value == 6&&players[i].hand[1].value == 6)
+						{
+							if(players[0].hand[1].value<=6 && players[0].hand[1].value>=2) cout<<"You must split(L) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy  ";
+						}
+						else if(players[i].hand[0].value == 7&&players[i].hand[1].value == 7)
+						{
+							if(players[0].hand[1].value<=7 && players[0].hand[1].value>=2) cout<<"You must split(L) according to the strategy ";
+							else if(players[0].hand[1].value<=10) cout<<"You must take a stay(S) according to the strategy ";
+							else cout<<"You must take a hit(H) according to the strategy  ";
+						}
+						else if(players[i].hand[0].value == 8&&players[i].hand[1].value == 8) cout<<"You must split(L) according to the strategy ";
+						else if(players[i].hand[0].value == 9&&players[i].hand[1].value == 9)
+						{
+							if((players[0].hand[1].value<=6 && players[0].hand[1].value>=2)||(players[0].hand[1].value<=9 && players[0].hand[1].value>=8))
+							cout<<"You must split(L) according to the strategy ";
+							else
+							cout<<"You must take a stay(S) according to the strategy ";
+						}
+						else if(players[i].hand[0].value == 10&&players[i].hand[1].value == 10)
+						{
+							cout<<"You must take a stay(S) according to the strategy ";
+						}
+						else if(players[i].hand[0].value == 1&&players[i].hand[1].value == 1)
+						cout<<"You must split(L) according to the strategy ";
+					}time(&stop);
 					cin >> input; //takes in the input
+					time(&start1);
 					switch(input){ //what did they choose?
 					case 'L': //they wanted to split
 						split(players[0], players[i]); //we split them
@@ -325,6 +445,10 @@ void play(vector<player> &players){
 	}	
 
 	clear(players[0].hand); //clear out the dealers hand
+		time(&end);
+	double time_taken = double(end - start1 + stop - start); 
+    	cout << "Time taken by program is : " << fixed << time_taken << setprecision(8); 
+    	cout << " sec " << endl;
 }
 /**
 	The below method clears out a players hand
@@ -356,13 +480,6 @@ account create(){
 	cout << "Please enter a password." << endl; //asks for password
 	cin.ignore(); // so cin will work
 	getline(cin, user.password); //takes in the line b/c it may be more than one word
-    cin.ignore(); //so the next line will wokr
-
-	cout << "Please enter your name." << endl; //asks for the users name
-	cin>>user.name; //takes it in
-
-	cout << "Please enter your email address." << endl; //asks for email address
-	cin >> user.email; //takes it in
 
 	cout << "Please enter how much money you'd like to deposit" << endl; //asks for money
 	cin >> user.money; //takes it in
@@ -394,7 +511,7 @@ void save(player user){
 	else{
 		percent = ((double)user.info.wins/user.info.total_played)*100; //win percentage
 	}
-	output << user.info.username << endl << user.info.password << endl << user.info.name << endl << user.info.email << endl << user.info.money << endl << user.info.total_played << endl << user.info.wins << endl << setprecision (3) << percent; //writes the data to the file
+	output << user.info.username << endl << user.info.password << endl << user.info.money << endl << user.info.total_played << endl << user.info.wins << endl << setprecision (3) << percent; //writes the data to the file
 
 	output.close(); //closes the output stream
 }
@@ -429,8 +546,6 @@ account load(){
 	/**
 		Takes in all the user info 
 	*/
-	getline(input, user.name);
-	getline(input, user.email);
 	input >> user.money;
 	input >> user.total_played;
 	input >>user.wins;
@@ -485,7 +600,7 @@ void insurance(vector<player> &players){
 void bet(player &user){
 	int bet;
 	do{
-		cout <<endl<< user.info.username << endl; //so we know what player is betting
+		cout << user.info.username << endl; //so we know what player is betting
 		cout << "How much would you like to bet? (Must be greater than the " << MIN_BET <<  " and less than " << user.info.money << ")" << endl; //we tell them what they can bet
 		cin >> bet; //takes in their bet
 	}while(!(bet >= MIN_BET && bet <= user.info.money)); //repeat until they get it right
@@ -627,7 +742,6 @@ char printSuit(card new_card){
 		case 3:
 			return 'C';
 	}
-	return 'e';
 }
 
 /**
